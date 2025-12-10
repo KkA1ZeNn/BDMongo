@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Библиотека</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📚 Моя Библиотека</h1>
+                <button class="btn btn-primary" id="addBookBtn">+ Добавить книгу</button>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBooks">0</div>
+                <div class="stat-label">Всего книг</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="readBooks">0</div>
+                <div class="stat-label">Прочитано</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="unreadBooks">0</div>
+                <div class="stat-label">К прочтению</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgRating">0</div>
+                <div class="stat-label">Средний рейтинг</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="genreFilter">Жанр:</label>
+                <select id="genreFilter" class="filter-select">
+                    <option value="all">Все жанры</option>
+                    <option value="Фантастика">Фантастика</option>
+                    <option value="Детектив">Детектив</option>
+                    <option value="Роман">Роман</option>
+                    <option value="Классика">Классика</option>
+                    <option value="Научпоп">Научпоп</option>
+                    <option value="Фэнтези">Фэнтези</option>
+                    <option value="Триллер">Триллер</option>
+                    <option value="Биография">Биография</option>
+                    <option value="История">История</option>
+                    <option value="Другое">Другое</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="statusFilter">Статус:</label>
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">Все книги</option>
+                    <option value="true">Прочитанные</option>
+                    <option value="false">Не прочитанные</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="sortBy">Сортировка:</label>
+                <select id="sortBy" class="filter-select">
+                    <option value="dateAdded">По дате добавления</option>
+                    <option value="title">По названию</option>
+                    <option value="author">По автору</option>
+                    <option value="year">По году</option>
+                    <option value="rating">По рейтингу</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Books Grid -->
+        <div class="books-grid" id="booksGrid">
+            <!-- Books will be dynamically inserted here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">📖</div>
+            <h2>Библиотека пуста</h2>
+            <p>Добавьте свою первую книгу, чтобы начать</p>
+            <button class="btn btn-primary" onclick="openAddBookModal()">Добавить книгу</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Book Modal -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Добавить книгу</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="bookForm">
+                <input type="hidden" id="bookId">
+                
+                <div class="form-group">
+                    <label for="title">Название *</label>
+                    <input type="text" id="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Автор *</label>
+                    <input type="text" id="author" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="genre">Жанр *</label>
+                        <select id="genre" required>
+                            <option value="">Выберите жанр</option>
+                            <option value="Фантастика">Фантастика</option>
+                            <option value="Детектив">Детектив</option>
+                            <option value="Роман">Роман</option>
+                            <option value="Классика">Классика</option>
+                            <option value="Научпоп">Научпоп</option>
+                            <option value="Фэнтези">Фэнтези</option>
+                            <option value="Триллер">Триллер</option>
+                            <option value="Биография">Биография</option>
+                            <option value="История">История</option>
+                            <option value="Другое">Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="year">Год издания</label>
+                        <input type="number" id="year" min="1000" max="2025">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="coverUrl">URL обложки</label>
+                    <input type="url" id="coverUrl" placeholder="https://...">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Описание</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="isRead">
+                            <span>Прочитана</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rating">Рейтинг</label>
+                        <div class="rating-input">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                            <input type="hidden" id="rating" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Заметки</label>
+                    <textarea id="notes" rows="2"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Book Modal -->
+    <div class="modal" id="viewBookModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="viewTitle"></h2>
+                <button class="close-btn" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="book-details">
+                <div class="book-cover-large">
+                    <img id="viewCover" src="" alt="Book cover" onerror="this.src='https://via.placeholder.com/200x300?text=No+Cover'">
+                </div>
+                <div class="book-info">
+                    <div class="info-row">
+                        <strong>Автор:</strong>
+                        <span id="viewAuthor"></span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Жанр:</strong>
+                        <span id="viewGenre" class="genre-badge"></span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Год издания:</strong>
+                        <span id="viewYear"></span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Статус:</strong>
+                        <span id="viewStatus"></span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Рейтинг:</strong>
+                        <span id="viewRatingStars"></span>
+                    </div>
+                    <div class="info-section">
+                        <strong>Описание:</strong>
+                        <p id="viewDescription"></p>
+                    </div>
+                    <div class="info-section" id="viewNotesSection">
+                        <strong>Заметки:</strong>
+                        <p id="viewNotes"></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="editBookFromView()">Редактировать</button>
+                        <button class="btn btn-danger" onclick="deleteBookFromView()">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
