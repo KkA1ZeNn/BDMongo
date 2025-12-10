@@ -24,13 +24,13 @@ function setupEventListeners() {
     document.getElementById('genreFilter').addEventListener('change', handleFilterChange);
     document.getElementById('statusFilter').addEventListener('change', handleFilterChange);
     document.getElementById('sortBy').addEventListener('change', handleFilterChange);
-    
+
     // Rating stars
     document.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', handleRatingClick);
         star.addEventListener('mouseenter', handleRatingHover);
     });
-    
+
     document.querySelector('.rating-input').addEventListener('mouseleave', () => {
         updateRatingDisplay(parseInt(document.getElementById('rating').value));
     });
@@ -42,10 +42,10 @@ async function loadBooks() {
         const params = new URLSearchParams(currentFilters);
         const response = await fetch(`${API_URL}/books?${params}`);
         if (!response.ok) throw new Error('Ошибка загрузки книг');
-        
+
         books = await response.json();
         renderBooks();
-        
+
     } catch (error) {
         console.error('Ошибка:', error);
         showNotification('Ошибка при загрузке книг', 'error');
@@ -56,13 +56,13 @@ async function loadStats() {
     try {
         const response = await fetch(`${API_URL}/stats`);
         if (!response.ok) throw new Error('Ошибка загрузки статистики');
-        
+
         const stats = await response.json();
         document.getElementById('totalBooks').textContent = stats.total;
         document.getElementById('readBooks').textContent = stats.read;
         document.getElementById('unreadBooks').textContent = stats.unread;
         document.getElementById('avgRating').textContent = stats.averageRating;
-        
+
     } catch (error) {
         console.error('Ошибка:', error);
     }
@@ -75,14 +75,14 @@ async function createBook(bookData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bookData)
         });
-        
+
         if (!response.ok) throw new Error('Ошибка создания книги');
-        
+
         showNotification('Книга успешно добавлена!', 'success');
         loadBooks();
         loadStats();
         closeModal();
-        
+
     } catch (error) {
         console.error('Ошибка:', error);
         showNotification('Ошибка при добавлении книги', 'error');
@@ -96,14 +96,14 @@ async function updateBook(id, bookData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bookData)
         });
-        
+
         if (!response.ok) throw new Error('Ошибка обновления книги');
-        
+
         showNotification('Книга успешно обновлена!', 'success');
         loadBooks();
         loadStats();
         closeModal();
-        
+
     } catch (error) {
         console.error('Ошибка:', error);
         showNotification('Ошибка при обновлении книги', 'error');
@@ -112,19 +112,19 @@ async function updateBook(id, bookData) {
 
 async function deleteBook(id) {
     if (!confirm('Вы уверены, что хотите удалить эту книгу?')) return;
-    
+
     try {
         const response = await fetch(`${API_URL}/books/${id}`, {
             method: 'DELETE'
         });
-        
+
         if (!response.ok) throw new Error('Ошибка удаления книги');
-        
+
         showNotification('Книга успешно удалена!', 'success');
         loadBooks();
         loadStats();
         closeViewModal();
-        
+
     } catch (error) {
         console.error('Ошибка:', error);
         showNotification('Ошибка при удалении книги', 'error');
@@ -135,16 +135,16 @@ async function deleteBook(id) {
 function renderBooks() {
     const grid = document.getElementById('booksGrid');
     const emptyState = document.getElementById('emptyState');
-    
+
     if (books.length === 0) {
         grid.style.display = 'none';
         emptyState.style.display = 'block';
         return;
     }
-    
+
     grid.style.display = 'grid';
     emptyState.style.display = 'none';
-    
+
     grid.innerHTML = books.map(book => `
         <div class="book-card" onclick="viewBook('${book._id}')">
             <img class="book-cover" 
@@ -193,7 +193,7 @@ function openAddBookModal() {
 function editBook(id) {
     const book = books.find(b => b._id === id);
     if (!book) return;
-    
+
     document.getElementById('modalTitle').textContent = 'Редактировать книгу';
     document.getElementById('bookId').value = book._id;
     document.getElementById('title').value = book.title;
@@ -205,7 +205,7 @@ function editBook(id) {
     document.getElementById('rating').value = book.rating || 0;
     document.getElementById('notes').value = book.notes || '';
     document.getElementById('coverUrl').value = book.coverUrl || '';
-    
+
     updateRatingDisplay(book.rating || 0);
     currentBookId = book._id;
     document.getElementById('bookModal').classList.add('active');
@@ -214,9 +214,9 @@ function editBook(id) {
 function viewBook(id) {
     const book = books.find(b => b._id === id);
     if (!book) return;
-    
+
     currentBookId = book._id;
-    
+
     document.getElementById('viewTitle').textContent = book.title;
     document.getElementById('viewAuthor').textContent = book.author;
     document.getElementById('viewGenre').textContent = book.genre;
@@ -228,7 +228,7 @@ function viewBook(id) {
     `;
     document.getElementById('viewRatingStars').innerHTML = book.rating > 0 ? getStars(book.rating) : 'Нет рейтинга';
     document.getElementById('viewDescription').textContent = book.description || 'Описание отсутствует';
-    
+
     const notesSection = document.getElementById('viewNotesSection');
     if (book.notes) {
         notesSection.style.display = 'block';
@@ -236,10 +236,10 @@ function viewBook(id) {
     } else {
         notesSection.style.display = 'none';
     }
-    
+
     const coverImg = document.getElementById('viewCover');
-    coverImg.src = book.coverUrl || `https://via.placeholder.com/200x300?text=${encodeURIComponent(book.title)}`;
-    
+    coverImg.src = book.coverUrl || '';
+
     document.getElementById('viewBookModal').classList.add('active');
 }
 
@@ -266,7 +266,7 @@ function closeViewModal() {
 window.addEventListener('click', (e) => {
     const bookModal = document.getElementById('bookModal');
     const viewModal = document.getElementById('viewBookModal');
-    
+
     if (e.target === bookModal) {
         closeModal();
     }
@@ -278,7 +278,7 @@ window.addEventListener('click', (e) => {
 // Form Submit Handler
 function handleBookSubmit(e) {
     e.preventDefault();
-    
+
     const bookData = {
         title: document.getElementById('title').value.trim(),
         author: document.getElementById('author').value.trim(),
@@ -290,9 +290,9 @@ function handleBookSubmit(e) {
         notes: document.getElementById('notes').value.trim(),
         coverUrl: document.getElementById('coverUrl').value.trim()
     };
-    
+
     const bookId = document.getElementById('bookId').value;
-    
+
     if (bookId) {
         updateBook(bookId, bookData);
     } else {
@@ -303,7 +303,7 @@ function handleBookSubmit(e) {
 // Filter Handler
 function handleFilterChange(e) {
     const filterId = e.target.id;
-    
+
     if (filterId === 'genreFilter') {
         currentFilters.genre = e.target.value;
     } else if (filterId === 'statusFilter') {
@@ -311,7 +311,7 @@ function handleFilterChange(e) {
     } else if (filterId === 'sortBy') {
         currentFilters.sortBy = e.target.value;
     }
-    
+
     loadBooks();
 }
 
@@ -357,9 +357,9 @@ function showNotification(message, type = 'success') {
         font-weight: 600;
     `;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
